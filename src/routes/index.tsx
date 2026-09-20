@@ -181,6 +181,7 @@ function Gallery() {
   const [active, setActive] = useState<number | null>(null);
   const [touchStart, setTouchStart] = useState(0);
   const photos = useMemo(() => [...initialPhotos, ...uploads], [uploads]);
+  const activePhoto = active === null ? undefined : photos[active];
   const move = useCallback((direction: number) => setActive(current => current === null ? null : (current + direction + photos.length) % photos.length), [photos.length]);
   useEffect(() => {
     const key = (event: KeyboardEvent) => { if (active === null) return; if (event.key === "Escape") setActive(null); if (event.key === "ArrowRight") move(1); if (event.key === "ArrowLeft") move(-1); };
@@ -193,10 +194,10 @@ function Gallery() {
   return <section className="section gallery-section"><SectionHeading kicker="A gallery of us" title="Moments That Became Memories" copy="Every photograph is a small door back to a beautiful moment." />
     <div className="gallery-actions"><label className="upload-control"><ImagePlus /> Add your memories<input type="file" accept="image/*" multiple onChange={upload} /></label></div>
     <div className="masonry">{photos.map((photo, index) => <Reveal key={`${photo.src}-${index}`} className="gallery-item"><button onClick={() => setActive(index)} aria-label={`View ${photo.caption}`}><img src={photo.src} alt={photo.alt} loading="lazy" /><span>{photo.caption}<Maximize2 /></span></button></Reveal>)}</div>
-    <AnimatePresence>{active !== null && <motion.div className="lightbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActive(null)} onTouchStart={e => setTouchStart(e.touches[0]?.clientX ?? 0)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientX ?? 0; if (Math.abs(end - touchStart) > 45) move(end < touchStart ? 1 : -1); }}>
+    <AnimatePresence>{activePhoto && <motion.div className="lightbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActive(null)} onTouchStart={e => setTouchStart(e.touches[0]?.clientX ?? 0)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientX ?? 0; if (Math.abs(end - touchStart) > 45) move(end < touchStart ? 1 : -1); }}>
       <Button variant="moonlit" size="icon" className="lightbox-close" onClick={() => setActive(null)} aria-label="Close image"><X /></Button>
       <Button variant="moonlit" size="icon" className="lightbox-prev" onClick={e => { e.stopPropagation(); move(-1); }} aria-label="Previous image"><ChevronLeft /></Button>
-      <motion.figure key={photos[active].src} initial={{ scale: .94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}><img src={photos[active].src} alt={photos[active].alt} /><figcaption>{photos[active].caption}</figcaption></motion.figure>
+      <motion.figure key={activePhoto.src} initial={{ scale: .94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={e => e.stopPropagation()}><img src={activePhoto.src} alt={activePhoto.alt} /><figcaption>{activePhoto.caption}</figcaption></motion.figure>
       <Button variant="moonlit" size="icon" className="lightbox-next" onClick={e => { e.stopPropagation(); move(1); }} aria-label="Next image"><ChevronRight /></Button>
     </motion.div>}</AnimatePresence>
   </section>;
@@ -212,9 +213,10 @@ function Timeline() {
 
 function LilyGarden() {
   const [open, setOpen] = useState<number | null>(null);
+  const openLily = open === null ? undefined : lilies[open];
   return <section className="lily-garden"><Stars count={26} /><SectionHeading kicker="Touch a flower" title="The Garden You Grew" copy="Every lily carries something beautiful that reminds me of you." />
     <div className="lily-pond">{lilies.map(([name, message], index) => <motion.button key={name} className={`lily-memory lily-${index + 1}`} onClick={() => setOpen(open === index ? null : index)} initial={{ scale: .25, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true, amount: .8 }} transition={{ delay: index * .12, type: "spring" }} aria-label={`Open ${name} lily`}><Lily size={index % 3 === 0 ? "lg" : "md"} /><span>{name}</span></motion.button>)}</div>
-    <AnimatePresence>{open !== null && <motion.div className="lily-message" initial={{ opacity: 0, scale: .85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .9 }}><Button variant="ghost" size="icon" onClick={() => setOpen(null)} aria-label="Close message"><X /></Button><Lily /><h3>{lilies[open][0]}</h3><p>{lilies[open][1]}</p></motion.div>}</AnimatePresence>
+    <AnimatePresence>{openLily && <motion.div className="lily-message" initial={{ opacity: 0, scale: .85 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .9 }}><Button variant="ghost" size="icon" onClick={() => setOpen(null)} aria-label="Close message"><X /></Button><Lily /><h3>{openLily[0]}</h3><p>{openLily[1]}</p></motion.div>}</AnimatePresence>
   </section>;
 }
 
