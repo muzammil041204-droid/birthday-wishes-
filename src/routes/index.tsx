@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion, useInView } from "motion/react";
-import { ChevronDown, ChevronLeft, ChevronRight, Heart, ImagePlus, Maximize2, Music2, Pause, Sparkles, Volume2, VolumeX, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, Heart, Maximize2, Sparkles, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import moonlitLake from "@/assets/moonlit-lily-lake.jpg";
 import purpleAsset from "@/assets/nilafer-purple.jpg.asset.json";
@@ -9,13 +9,11 @@ import filmAsset from "@/assets/nilafer-film.jpg.asset.json";
 import rosesAsset from "@/assets/nilafer-roses.jpg.asset.json";
 import mountainAsset from "@/assets/nilafer-mountains.jpg.asset.json";
 
-const BIRTHDAY = "2027-05-24T00:00:00+05:30"; // Change Nilafer's birthday here.
-
 const qualities = [
   ["Your Kindness", "The quiet way you care makes the world gentler for everyone around you."],
   ["Your Smile", "It carries its own light — warm, honest, and impossible to forget."],
   ["Your Strength", "You meet life with a courage more beautiful than you know."],
-  ["Your Dreams", "The way you believe in tomorrow makes every possibility feel closer."],
+  ["Your Eyes", "In your eyes, I find a whole universe — soft as moonlight, deep as the night, and beautiful enough to get lost in forever."],
   ["The Way You Care", "You remember the little things, and somehow they become everything."],
   ["The Happiness You Bring", "Ordinary moments feel like memories whenever you are near."],
 ] as const;
@@ -27,13 +25,13 @@ const initialPhotos = [
   { src: mountainAsset.url, alt: "Nilafer in the mountain sunlight", caption: "Sunlight found its favorite face" },
 ];
 
-const timeline = [
-  ["The Day We Met", "Some days pass quietly. That day became the beginning of something unforgettable."],
-  ["First Conversation", "Words became comfort, and minutes began to feel too short."],
-  ["First Laugh Together", "A sound I did not know would become one of my favorite things."],
-  ["Favorite Memory", "Not a grand moment — simply us, being completely ourselves."],
-  ["Unforgettable Moments", "A constellation of little memories I will always keep close."],
-  ["Today", "Celebrating the beautiful soul who makes every chapter brighter."],
+const loveVerses = [
+  ["In Your Presence", "Even the moon seems to soften when you are near, as though the night itself has learned your tenderness."],
+  ["In Your Eyes", "I see quiet constellations there — a thousand lovely places where my heart would gladly stay."],
+  ["In Your Smile", "There is a kind of sunrise in your smile that turns even my darkest hours golden."],
+  ["In Every Silence", "I do not always need words with you; sometimes love is simply the peace of knowing your heart is close."],
+  ["Across Every Distance", "No road is long enough to make you feel far away, because my heart carries you wherever I go."],
+  ["Always You", "If I could choose one soul in every lifetime, beneath every sky, it would still and always be you."],
 ] as const;
 
 const reasons = ["Your laugh", "Your kindness", "Your determination", "Your beautiful personality", "Your honest heart", "Your quiet courage", "The way you listen", "Your playful side", "Your thoughtful words", "Your graceful spirit", "How deeply you care", "Simply being you"];
@@ -62,47 +60,16 @@ export const Route = createFileRoute("/")({
 
 function BirthdayExperience() {
   const [loaded, setLoaded] = useState(false);
-  const [musicOn, setMusicOn] = useState(false);
-  const audioRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setLoaded(true), 1800);
     return () => window.clearTimeout(timer);
   }, []);
 
-  const toggleMusic = useCallback(() => {
-    if (musicOn && audioRef.current) {
-      void audioRef.current.close();
-      audioRef.current = null;
-      setMusicOn(false);
-      return;
-    }
-    const AudioContextClass = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const context = new AudioContextClass();
-    const gain = context.createGain();
-    gain.gain.value = 0.018;
-    gain.connect(context.destination);
-    [174.61, 220, 261.63].forEach((frequency, index) => {
-      const oscillator = context.createOscillator();
-      const noteGain = context.createGain();
-      oscillator.type = "sine";
-      oscillator.frequency.value = frequency;
-      noteGain.gain.value = index === 0 ? 0.45 : 0.18;
-      oscillator.connect(noteGain).connect(gain);
-      oscillator.start();
-    });
-    audioRef.current = context;
-    setMusicOn(true);
-  }, [musicOn]);
-
   return (
     <main className="birthday-shell">
       <AnimatePresence>{!loaded && <LoadingScreen />}</AnimatePresence>
-      <Button variant="moonlit" size="icon" className="music-toggle" onClick={toggleMusic} aria-label={musicOn ? "Turn ambient music off" : "Turn ambient music on"} title={musicOn ? "Mute moonlight melody" : "Play moonlight melody"}>
-        {musicOn ? <Volume2 /> : <VolumeX />}
-      </Button>
-      <Hero musicOn={musicOn} toggleMusic={toggleMusic} />
+      <Hero />
       <Qualities />
       <Gallery />
       <Timeline />
@@ -125,7 +92,7 @@ function LoadingScreen() {
   );
 }
 
-function Hero({ musicOn, toggleMusic }: { musicOn: boolean; toggleMusic: () => void }) {
+function Hero() {
   return (
     <section className="hero" id="top">
       <img src={moonlitLake} width={1920} height={1080} alt="Blue water lilies beneath a moonlit sky" className="hero-bg" />
@@ -136,24 +103,10 @@ function Hero({ musicOn, toggleMusic }: { musicOn: boolean; toggleMusic: () => v
         <span className="eyebrow">A moonlit celebration for a rare soul</span>
         <h1><em>Happy Birthday,</em> Nilafer</h1>
         <p>Like the rare blue water lily that blooms with grace and beauty, you make every moment brighter simply by being yourself.</p>
-        <Countdown />
-        <Button variant="moonlit" onClick={toggleMusic} className="hero-music">
-          {musicOn ? <Pause /> : <Music2 />} {musicOn ? "Pause the melody" : "Play the moonlight melody"}
-        </Button>
       </motion.div>
       <a href="#special" className="scroll-cue" aria-label="Scroll to the story"><span>Enter the garden</span><ChevronDown /></a>
     </section>
   );
-}
-
-function Countdown() {
-  const calculate = () => {
-    const distance = Math.max(0, new Date(BIRTHDAY).getTime() - Date.now());
-    return { days: Math.floor(distance / 86400000), hours: Math.floor(distance / 3600000) % 24, mins: Math.floor(distance / 60000) % 60, secs: Math.floor(distance / 1000) % 60 };
-  };
-  const [time, setTime] = useState(calculate);
-  useEffect(() => { const id = window.setInterval(() => setTime(calculate()), 1000); return () => window.clearInterval(id); }, []);
-  return <div className="countdown" aria-label="Countdown to Nilafer's birthday">{Object.entries(time).map(([label, value]) => <div key={label}><strong>{String(value).padStart(2, "0")}</strong><span>{label}</span></div>)}</div>;
 }
 
 function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -177,22 +130,16 @@ function Qualities() {
 }
 
 function Gallery() {
-  const [uploads, setUploads] = useState<typeof initialPhotos>([]);
   const [active, setActive] = useState<number | null>(null);
   const [touchStart, setTouchStart] = useState(0);
-  const photos = useMemo(() => [...initialPhotos, ...uploads], [uploads]);
+  const photos = initialPhotos;
   const activePhoto = active === null ? undefined : photos[active];
   const move = useCallback((direction: number) => setActive(current => current === null ? null : (current + direction + photos.length) % photos.length), [photos.length]);
   useEffect(() => {
     const key = (event: KeyboardEvent) => { if (active === null) return; if (event.key === "Escape") setActive(null); if (event.key === "ArrowRight") move(1); if (event.key === "ArrowLeft") move(-1); };
     window.addEventListener("keydown", key); return () => window.removeEventListener("keydown", key);
   }, [active, move]);
-  const upload = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    setUploads(current => [...current, ...files.map((file, i) => ({ src: URL.createObjectURL(file), alt: file.name, caption: `A new memory ${current.length + i + 1}` }))]);
-  };
   return <section className="section gallery-section"><SectionHeading kicker="A gallery of us" title="Moments That Became Memories" copy="Every photograph is a small door back to a beautiful moment." />
-    <div className="gallery-actions"><label className="upload-control"><ImagePlus /> Add your memories<input type="file" accept="image/*" multiple onChange={upload} /></label></div>
     <div className="masonry">{photos.map((photo, index) => <Reveal key={`${photo.src}-${index}`} className="gallery-item"><button onClick={() => setActive(index)} aria-label={`View ${photo.caption}`}><img src={photo.src} alt={photo.alt} loading="lazy" /><span>{photo.caption}<Maximize2 /></span></button></Reveal>)}</div>
     <AnimatePresence>{activePhoto && <motion.div className="lightbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setActive(null)} onTouchStart={e => setTouchStart(e.touches[0]?.clientX ?? 0)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientX ?? 0; if (Math.abs(end - touchStart) > 45) move(end < touchStart ? 1 : -1); }}>
       <Button variant="moonlit" size="icon" className="lightbox-close" onClick={() => setActive(null)} aria-label="Close image"><X /></Button>
@@ -204,10 +151,8 @@ function Gallery() {
 }
 
 function Timeline() {
-  const [attachments, setAttachments] = useState<Record<number, string>>({});
-  const add = (index: number, event: ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; if (file) setAttachments(a => ({ ...a, [index]: URL.createObjectURL(file) })); };
-  return <section className="section timeline-section"><SectionHeading kicker="Written in starlight" title="Our Story, Still Unfolding" />
-    <div className="timeline">{timeline.map(([title, text], index) => <Reveal key={title} className={`timeline-row ${index % 2 ? "timeline-right" : ""}`}><div className="timeline-dot"><span /></div><article>{attachments[index] && <img src={attachments[index]} alt={`Memory for ${title}`} />}<span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{text}</p><label><ImagePlus /> Add a photo<input type="file" accept="image/*" onChange={e => add(index, e)} /></label></article></Reveal>)}</div>
+  return <section className="section timeline-section"><SectionHeading kicker="Love, written in moonlight" title="Words My Heart Keeps for You" />
+    <div className="timeline">{loveVerses.map(([title, text], index) => <Reveal key={title} className={`timeline-row ${index % 2 ? "timeline-right" : ""}`}><div className="timeline-dot"><span /></div><article><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{text}</p></article></Reveal>)}</div>
   </section>;
 }
 
